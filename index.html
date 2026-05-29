@@ -1419,21 +1419,26 @@ async function sendMessage() {
   showTyping();
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer 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'
+      },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: buildSystemPrompt(),
-        messages: conversationHistory
+        model: 'llama-3.3-70b-versatile',
+        max_tokens: 4000,
+        messages: [
+          { role: 'system', content: buildSystemPrompt() },
+          ...conversationHistory
+        ]
       })
     });
 
     const data = await response.json();
     removeTyping();
 
-    const aiText = data.content?.[0]?.text || 'Ошибка: пустой ответ от нейросети.';
+    const aiText = data.choices?.[0]?.message?.content || 'Ошибка: пустой ответ.';
     conversationHistory.push({ role: 'assistant', content: aiText });
     addMessage('ai', aiText);
 
